@@ -1,0 +1,33 @@
+EECS 339 Introduction to Database System
+Laboratory 2 Write-up
+Haikun Liu (hlg483)
+
+This lab exercise took me about a week to finish. The API remains as the same, and no additional classes are added. I follow the hints and suggestion provided to design the solutions; as well, exploring until tests are helpful to get some rough ideas for implementation.
+
+Predicate.java: This class is implemented straightforwardly with the guidance of instructions and comments 
+
+JoinPredicate.java: This class is also straightforward. The compare(op, field) function is used in filter(tuple, tuple) function.
+
+Filter.java: The fetchNext() function is implemented with iterating through the child iterator and applying the predicate filter(tuple) function to make selection.
+
+Join.java: The tetchNext() function is implemented using nested while loop. The join operation is done by iterating through child1 table with iterating through child2 table. If the predicate function filter(tuple,tuple) returns true value, a new tuple is created to save the joint value. 
+
+IntegerAggregator.java: The class is implemented using a HashMap: one is to store fileds and aggregate values, the other is to count the number of tuples for AVG and COUNT operations. For Min and Max operations, the current value is compared with the previous value in the map to see if it needs to be updated. The tricky part of this class is dealing with AVG and COUNT operations. Since we can't compute it until you know the total number of tuples in the group, we use the second HashMap as mentioned above to do counting. The iterator is then implemented with the AVG and COUNT operation. The idea is when we call this iterator, we have known the number of tuple for AVG and COUNT operation, then we can directly add the results of AVG and COUNT into the iterator. 
+
+StringAggregator.java: The class is implemented using the same idea in IntegerAggregator.java with only the COUNT is supported. So, one HashMap is enough to store fields and counting results. 
+
+Aggregate.java: This class is implemented with Aggregators.java by grouping and doing the aggregate calculations for all the tuples in the child iterator. 
+
+HeapPage.java: insertTuple(tuple) is implemented using a linear search of the page sotred through the header using isSlotUsed(int) to find an empty space to insert the tuple; and the header is updated accordingly. deleteTuple(tuple) gets the RecordId from the input tuple, removes the tuple and updates the header.
+
+HeapFile.java: insertTuple(TransactionId, tuple) is implemented with searching an empty slot in a heap page to insert the tuple. If free slot does not exist, we can create a new page to store the tuple. deleteTuple(TransactionId, tuple) determines the PageId from the input tuple and uses deleteTuple(tuple) function to delete the tuple.
+
+Insert.java: There is a accumulator used in fetchNext() function to keep track of how many items were inserted and return within a tuple.
+
+Delete.java: The idea is the same as Insert.java
+
+BufferPool.java: insertTuple() and deleteTuple() are implemented using insertTuple() and deleteTuple() functions in HeapFile.java. Then, we can get a list of modified pages and mark them with dirty and update them in the cache.
+
+Page Eviction Policy: I use a simple FIFO policy to flush pages into the disk. We can iterate through the cache and find first page without dirty mark as target to flush into the disk. It is easy to understand and debug. There are no other optimizations in the policy. 
+
+Difficulty: the bit manipulation of header byte. 
